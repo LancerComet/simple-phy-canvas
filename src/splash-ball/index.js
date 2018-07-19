@@ -1,12 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const canvas = document.querySelector('#app-canvas');
 const context = canvas.getContext('2d');
 window.addEventListener('resize', setCanvasSize);
@@ -24,9 +16,10 @@ class Ball {
         this.canvas = document.createElement('canvas');
         this.initSpeedX = param.speedX || 0;
         this.initSpeedY = param.speedY || 0;
-        this.x = param.x || 0;
-        this.y = param.y || 0;
         this.G = param.G || 40;
+        this.initX = param.x || 0;
+        this.initY = param.y || 0;
+        this.reset();
         this.color = param.color || '#ffffff';
         this.size = param.size || 10;
         this.resistance = param.resistance || 100;
@@ -41,6 +34,11 @@ class Ball {
         const time = (Date.now() - this.createAt) / 1000;
         const currentSpeed = this.initSpeedY - this.G * time;
         this.y += currentSpeed * -1;
+    }
+    reset() {
+        this.x = this.initX;
+        this.y = this.initY;
+        this.createAt = Date.now();
     }
     bounceY() {
         this.createAt = Date.now() - this.resistance * this.bounceYCount;
@@ -78,25 +76,22 @@ function createBall(count) {
     }
 }
 function tick() {
-    return __awaiter(this, void 0, void 0, function* () {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0, length = balls.length; i < length; i++) {
-            const ball = balls[i];
-            if (!ball) {
-                continue;
-            }
-            ball.moveX();
-            ball.moveY();
-            if (ball.x < 0 ||
-                ball.x > canvas.width ||
-                ball.y > canvas.height) {
-                balls.splice(i, 1);
-                createBall(1);
-            }
-            context.drawImage(ball.canvas, ball.x, ball.y);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0, length = balls.length; i < length; i++) {
+        const ball = balls[i];
+        if (!ball) {
+            continue;
         }
-        requestAnimationFrame(tick);
-    });
+        ball.moveX();
+        ball.moveY();
+        if (ball.x < 0 ||
+            ball.x > canvas.width ||
+            ball.y > canvas.height) {
+            ball.reset();
+        }
+        context.drawImage(ball.canvas, ball.x, ball.y);
+    }
+    requestAnimationFrame(tick);
 }
 function getRandomColor() {
     const colors = [

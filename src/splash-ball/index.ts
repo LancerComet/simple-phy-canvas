@@ -19,6 +19,8 @@ class Ball {
 
   readonly initSpeedX: number  // px / s
   readonly initSpeedY: number  // px / s
+  readonly initX: number
+  readonly initY: number
 
   private bounceYCount: number = 1
 
@@ -38,6 +40,12 @@ class Ball {
     const time = (Date.now() - this.createAt) / 1000
     const currentSpeed = this.initSpeedY - this.G * time
     this.y += currentSpeed * -1
+  }
+
+  reset () {
+    this.x = this.initX
+    this.y = this.initY
+    this.createAt = Date.now()
   }
 
   bounceY () {
@@ -64,9 +72,12 @@ class Ball {
     this.initSpeedX = param.speedX || 0
     this.initSpeedY = param.speedY || 0
 
-    this.x = param.x || 0
-    this.y = param.y || 0
     this.G = param.G || 40
+
+    this.initX = param.x || 0
+    this.initY = param.y || 0
+
+    this.reset()
 
     this.color = param.color || '#ffffff'
     this.size = param.size || 10
@@ -112,7 +123,7 @@ function createBall (count: number) {
   }
 }
 
-async function tick () {
+function tick () {
   context.clearRect(0, 0, canvas.width, canvas.height)
   for (let i = 0, length = balls.length; i < length; i++) {
     const ball = balls[i]
@@ -128,8 +139,7 @@ async function tick () {
       ball.x > canvas.width ||
       ball.y > canvas.height
     ) {
-      balls.splice(i, 1)
-      createBall(1)
+      ball.reset()
     }
 
     context.drawImage(ball.canvas, ball.x, ball.y)
